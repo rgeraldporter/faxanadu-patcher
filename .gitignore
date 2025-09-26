@@ -1,0 +1,4 @@
+/target
+/roms
+*.nes
+.DS_Store
