@@ -16,6 +16,8 @@ Then take your Faxanadu ROM and point the compiled program at it:
 target/release/faxanadu_patcher roms/Faxanadu.nes roms/FaxanduPatched.nes
 ```
 
+Right now it's a whole bunch of patches that are turned on and off by commenting out patch commands in main.rs and elsewhere.
+
 ## Plans
 
 Right now mostly just trying to make a collection of scripts that allow for the building of a speedrun practice ROM, and for testing new features forthe Faxanadu randomizer.

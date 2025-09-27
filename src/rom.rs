@@ -51,9 +51,17 @@ impl Rom {
         self.data[offset..offset + bytes.len()].copy_from_slice(bytes);
     }
 
-    pub fn write_word(&mut self, offset: usize, value: u16) {
-        self.data[offset] = (value & 0xFF) as u8;
-        self.data[offset + 1] = (value >> 8) as u8;
+    /// Read a little-endian 16-bit word from file offset.
+    pub fn read_word(&self, off: usize) -> u16 {
+        let lo = self.read_byte(off) as u16;
+        let hi = self.read_byte(off + 1) as u16;
+        lo | (hi << 8)
+    }
+
+    /// Write a little-endian 16-bit word to file offset.
+    pub fn write_word(&mut self, off: usize, val: u16) {
+        self.write_byte(off, (val & 0xFF) as u8);
+        self.write_byte(off + 1, (val >> 8) as u8);
     }
 
     pub fn write_bytes(&mut self, offset: usize, bytes: &[u8]) {

@@ -1,7 +1,11 @@
 use crate::rom::Rom;
 
 pub mod hud;
+pub mod inventory;
 pub mod level_skip;
+pub mod music;
+pub mod screens;
+pub mod shops;
 pub mod text;
 
 pub fn apply_all_hud_patches(rom: &mut Rom) {

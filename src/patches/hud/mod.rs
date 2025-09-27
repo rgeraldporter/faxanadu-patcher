@@ -32,14 +32,14 @@ pub fn substitute_all_jsr(rom: &mut Rom) {
 
 /// Apply all HUD patches directly at fixed addresses
 pub fn apply_all_hud_patches(rom: &mut Rom) {
-    let routines: [(&str, u16, Subroutine); 8] = [
+    let routines: [(&str, u16, Subroutine); 7] = [
         ("oint_dec", 0xFCD0, ointment::build_ointment_decrement()),
         ("oint_draw", 0xFD00, ointment::build_ointment_draw()),
         ("screen", 0xFD30, screen_id::build_screen_id()),
         ("level_sub", 0xFD60, level_display::build_level_display()),
         ("health", 0xFD90, health::build_health()),
         ("health_f", 0xFEA0, health_frac::build_health_frac()),
-        ("mana", 0xFE60, mana::build_mana()),
+        //("mana", 0xFE60, mana::build_mana()),
         ("frame", 0xFE20, frame_counter::build_frame_counter()),
     ];
 
