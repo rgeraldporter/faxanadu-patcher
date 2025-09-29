@@ -38,7 +38,7 @@ fn main() -> std::io::Result<()> {
         let new_items = vec![
             ShopItem {
                 id: ShopItemId::Book,
-                price: 500,
+                price: 0,
             },
             ShopItem {
                 id: ShopItemId::Crystal,
@@ -46,11 +46,11 @@ fn main() -> std::io::Result<()> {
             },
             ShopItem {
                 id: ShopItemId::Lamp,
-                price: 2000,
+                price: 0,
             },
             ShopItem {
                 id: ShopItemId::FireCrystal,
-                price: 3000,
+                price: 0,
             },
         ];
 

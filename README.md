@@ -16,6 +16,8 @@ Then take your Faxanadu ROM and point the compiled program at it:
 target/release/faxanadu_patcher roms/Faxanadu.nes roms/FaxanduPatched.nes
 ```
 
+You can add `--ips` at the end to also generate an IPS patch file.
+
 Right now it's a whole bunch of patches that are turned on and off by commenting out patch commands in main.rs and elsewhere.
 
 ## Plans

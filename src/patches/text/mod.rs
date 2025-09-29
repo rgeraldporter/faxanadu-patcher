@@ -1,3 +1,4 @@
+pub mod dialog;
 pub mod title_screen;
 
 pub struct TitleDict;
