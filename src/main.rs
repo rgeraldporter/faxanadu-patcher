@@ -6,9 +6,9 @@ mod rom;
 mod subroutine;
 
 use crate::ips::write_ips;
+use crate::rom::Rom;
 use patches::apply_all_hud_patches;
-use patches::inventory::crystal::install_crystal_warp_stub;
-use patches::inventory::crystal::patch_crystal_warp;
+use patches::inventory::crystal::*;
 use patches::level_skip::apply_pause_select_warp_patch;
 use patches::music::pause::apply_pause_music_patch;
 use patches::screens::{eolis, set_start_screen};
@@ -31,7 +31,6 @@ fn main() -> std::io::Result<()> {
     use crate::patches::shops::shops::{
         debug_print_shop, write_shop, ShopId, ShopItem, ShopItemId,
     };
-    use crate::rom::Rom;
 
     pub fn patch_eolis_item_shop(rom: &mut Rom) {
         // Replace with Book, Crystal, Wingboots, FireCrystal
@@ -63,18 +62,19 @@ fn main() -> std::io::Result<()> {
     //set_starting_gold(&mut rom, 1500);
     install_crystal_warp_stub(&mut rom);
     patch_crystal_warp(&mut rom);
+    add_crystal_to_magic_shop(&mut rom);
 
-    patch_eolis_item_shop(&mut rom);
+    //patch_eolis_item_shop(&mut rom);
 
     //apply_all_hud_patches(&mut rom);
-    apply_pause_select_warp_patch(&mut rom);
+    //apply_pause_select_warp_patch(&mut rom);
     /*patch_title_lines(
         &mut rom,
         "MUSIC PAUSE PATCH",
         "   IT IS PRONOUNCED",
         " FAX-AN-ADOO     v1",
     );*/
-    set_start_screen(&mut rom, eolis::EolisScreen::ShopsExterior);
+    //set_start_screen(&mut rom, eolis::EolisScreen::ShopsExterior);
 
     rom.save(&args[1])?;
     println!("Patched ROM written to {}", args[1]);

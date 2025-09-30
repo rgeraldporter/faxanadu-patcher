@@ -60,7 +60,7 @@ pub fn install_crystal_warp_stub(rom: &mut Rom) {
         0xD0, 0x08, // BNE If we have none of these, go to Eolis (0)
         0xA9, 0x00, // LDA #$00
         0x8D, 0x35, 0x04, // STA $0435 Save the area
-        0x4C, 0xD4, 0xFE, // JMP $FED4
+        0x4C, 0xD1, 0xFE, // JMP $FED1
         // --- $FE7C LoopStart
         0xEE, 0x35, 0x04, // INC $0435 increment area by 1
         0xAD, 0x35, 0x04, // LDA $0435
@@ -68,7 +68,7 @@ pub fn install_crystal_warp_stub(rom: &mut Rom) {
         0x90, 0x08, // BCC NotWrap
         0xA9, 0x00, // LDA #$00 Go to Eolis
         0x8D, 0x35, 0x04, // STA $0435 Save the area
-        0x4C, 0xD4, 0xFE, // JMP $FED4
+        0x4C, 0xD1, 0xFE, // JMP $FED1
         0xA8, // TAY = Load Area_Region into Y
         // --- AREA 1 Trunk
         0xC0, 0x01, // CPY #$01 Is this area 1
@@ -112,4 +112,25 @@ pub fn install_crystal_warp_stub(rom: &mut Rom) {
     rom.write_slice(off, &stub);
 
     println!("Installed Crystal warp stub");
+}
+
+pub fn add_crystal_to_magic_shop(rom: &mut Rom) {
+    // Crystal shop patch lives in bank 12
+    let bank = 12;
+    let base = rom.bank_base(bank);
+
+    // CPU address of the shop entries we want to patch
+    let shop_entry_cpu = 0xA363;
+
+    // Convert to file offset
+    let entry_off = base + (shop_entry_cpu - 0x8000) as usize;
+
+    // Write Crystal (0x8B) into the iScript
+    rom.write_byte(entry_off, 0x07); // ISCRIPT_ACTION_ADD_ITEM
+    rom.write_byte(entry_off + 1, 0x8B); // Crystal
+
+    println!(
+        "Added Crystal (0x8B) to magic shop at ${:04X} (bank {} offset 0x{:X})",
+        shop_entry_cpu, bank, entry_off
+    );
 }
