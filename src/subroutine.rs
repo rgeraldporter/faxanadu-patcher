@@ -75,11 +75,23 @@ impl Subroutine {
     }
 
     pub fn add_to_rom(self, dest_cpu: u16, bank: usize, rom: &mut Rom) {
-        let offset = rom.cpu_to_file_offset(bank, dest_cpu, BANK_BASE_ADDR);
+        let offset = rom.cpu_to_file_offset(bank, dest_cpu);
         rom.write_slice(offset, &self.bytes);
     }
 
-    /// Return the raw bytes of the subroutine
+    // Allocate space via the allocator, write bytes to ROM, return the CPU address.
+    pub fn alloc_and_write(
+        self,
+        bank: usize,
+        alloc: &mut crate::allocator::FreeSpaceAllocator,
+        rom: &mut Rom,
+    ) -> u16 {
+        let cpu_addr = alloc.alloc(bank, self.len());
+        self.add_to_rom(cpu_addr, bank, rom);
+        cpu_addr
+    }
+
+    // Return the raw bytes of the subroutine
     pub fn bytes(&self) -> &[u8] {
         &self.bytes
     }

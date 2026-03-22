@@ -1,6 +1,11 @@
-use crate::consts::{BANK_BASE_ADDR, TARGET_BANK};
 use crate::rom::Rom;
 
+/*
+ * Pause Music
+ *
+ * In the original game, pausing stops the music. This patch keeps the music
+ * playing during the pause screen.
+ */
 pub fn apply_pause_music_patch(rom: &mut Rom) {
     // Patch 1: 0x14020 D0 -> F0
     let off1 = 0x0014_020usize;
@@ -28,5 +33,5 @@ pub fn apply_pause_music_patch(rom: &mut Rom) {
     }
     rom.write_slice(off2, &[0xEA, 0xEA, 0xEA]);
 
-    println!("Applied pause-music IPS-equivalent patch at 0x14020 and 0x14045.");
+    println!("patch: Music continues playing during pause screen");
 }

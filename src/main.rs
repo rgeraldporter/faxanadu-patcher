@@ -1,19 +1,22 @@
 #![allow(dead_code, unused_imports)]
+mod allocator;
 mod consts;
 mod ips;
 mod patches;
 mod rom;
 mod subroutine;
 
+use crate::allocator::FreeSpaceAllocator;
 use crate::ips::write_ips;
 use crate::rom::Rom;
-use patches::apply_all_hud_patches;
-use patches::inventory::crystal::*;
-use patches::level_skip::apply_pause_select_warp_patch;
-use patches::music::pause::apply_pause_music_patch;
-use patches::screens::{eolis, set_start_screen};
-use patches::shops::shops::*;
-use patches::text::title_screen::patch_title_lines;
+use patches::bugfixes::*;
+use patches::indoor::*;
+use patches::items::*;
+use patches::music::apply_pause_music_patch;
+use patches::player::*;
+use patches::shops::*;
+use patches::sprites::*;
+use patches::text::*;
 
 use std::env;
 
@@ -25,56 +28,45 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut rom = rom::Rom::from_file(&args[0])?;
+    let mut alloc = FreeSpaceAllocator::new(&rom);
 
-    //apply_pause_music_patch(&mut rom);
+    apply_pause_music_patch(&mut rom);
+    equip_items_indoors(&mut rom);
+    allow_items_indoors(&mut rom);
+    draw_weapon_indoors(&mut rom);
+    fix_hourglass(&mut rom);
+    shield_ointment_fix(&mut rom, &mut alloc);
+    let mana_handler = black_potion_to_mana_potion(&mut rom, &mut alloc);
+    poison_to_black_potion(&mut rom);
+    no_knockback_on_ladders(&mut rom, &mut alloc);
+    //faster_text(&mut rom);
+    faster_text_v2(&mut rom, &mut alloc);
+    allow_lower_respawn(&mut rom);
+    allow_all_items_to_be_sold(&mut rom, &mut alloc);
+    add_killswitch(&mut rom, &mut alloc);
+    ointment_sugata_fix(&mut rom, &mut alloc);
+    pendant_quest_25(&mut rom, &mut alloc);
+    fire_crystal_screen_damage(&mut rom, &mut alloc, mana_handler);
+    crystal_warp_to_spawn(&mut rom, &mut alloc);
+    crystal_overworld_pickup(&mut rom, &mut alloc);
+    fire_crystal_overworld_pickup(&mut rom, &mut alloc);
+    fix_fire_spell_animation(&mut rom);
+    fix_studded_mail_climb_tile(&mut rom);
+    clone_sprite_1d_to_25(&mut rom);
+    allow_menu_on_first_screen(&mut rom);
+    //timer_hud_display(&mut rom, &mut alloc); // lag in this!
+    //area_name_hud(&mut rom, &mut alloc);
+    //fog_palettes(&mut rom, &mut alloc, &[0x0A, 0x0B]);
 
-    use crate::patches::shops::shops::{
-        debug_print_shop, write_shop, ShopId, ShopItem, ShopItemId,
-    };
-
-    pub fn patch_eolis_item_shop(rom: &mut Rom) {
-        // Replace with Book, Crystal, Wingboots, FireCrystal
-        let new_items = vec![
-            ShopItem {
-                id: ShopItemId::Book,
-                price: 0,
-            },
-            ShopItem {
-                id: ShopItemId::Crystal,
-                price: 0,
-            },
-            ShopItem {
-                id: ShopItemId::Lamp,
-                price: 0,
-            },
-            ShopItem {
-                id: ShopItemId::FireCrystal,
-                price: 0,
-            },
-        ];
-
-        write_shop(rom, ShopId::EolisItemShop, &new_items);
-
-        println!("Eolis Item shop updated:");
-        debug_print_shop(rom, ShopId::EolisItemShop);
-    }
-
-    //set_starting_gold(&mut rom, 1500);
-    install_crystal_warp_stub(&mut rom);
-    patch_crystal_warp(&mut rom);
-    add_crystal_to_magic_shop(&mut rom);
-
-    //patch_eolis_item_shop(&mut rom);
-
-    //apply_all_hud_patches(&mut rom);
-    //apply_pause_select_warp_patch(&mut rom);
+    // for speedrunning purposes
     /*patch_title_lines(
         &mut rom,
         "MUSIC PAUSE PATCH",
         "   IT IS PRONOUNCED",
         " FAX-AN-ADOO     v1",
     );*/
-    //set_start_screen(&mut rom, eolis::EolisScreen::ShopsExterior);
+
+    alloc.report();
 
     rom.save(&args[1])?;
     println!("Patched ROM written to {}", args[1]);

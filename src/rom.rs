@@ -33,7 +33,8 @@ impl Rom {
         header + bank * BANK_SIZE
     }
 
-    pub fn cpu_to_file_offset(&self, bank: usize, cpu_addr: u16, bank_base_addr: u16) -> usize {
+    pub fn cpu_to_file_offset(&self, bank: usize, cpu_addr: u16) -> usize {
+        let bank_base_addr = if cpu_addr >= 0xC000 { 0xC000u16 } else { 0x8000u16 };
         let base = self.bank_base(bank);
         let within = (cpu_addr - bank_base_addr) as usize;
         base + within
@@ -75,17 +76,4 @@ impl Rom {
         data[offset..end].copy_from_slice(bytes);
     }
 
-    pub fn find_free_block(&self, bank: usize, size: usize) -> Option<(usize, u16)> {
-        let base = self.bank_base(bank);
-        let bank_data = &self.data[base..base + crate::consts::BANK_SIZE];
-
-        for i in 0..=crate::consts::BANK_SIZE - size {
-            if bank_data[i..i + size].iter().all(|&b| b == 0xFF) {
-                let cpu_addr = crate::consts::BANK_BASE_ADDR as u16 + i as u16;
-                return Some((base + i, cpu_addr));
-            }
-        }
-
-        None
-    }
 }
