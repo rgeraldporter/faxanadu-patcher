@@ -1,40 +1,59 @@
 use crate::rom::Rom;
 
+const SOURCE_ENTITY: u16 = 29;  // 0x1D, Skeleton Knight
+const TARGET_ENTITY: u16 = 37;  // 0x25, Invisible Stationary #2
+
+// Per-entity table base addresses
+const SPRITE_UPDATE_HANDLERS: u16 = 0x8087;           // Bank 14, 2 bytes per entry
+const BANK6_SPRITEADDRS_START: u16 = 0x8002;           // Bank 6, 2 bytes per entry
+const SPRITE_APPEARANCE_PHASE_OFFSETS: u16 = 0x8C9F;   // Bank 14, 1 byte per entry
+const SPRITES_PPU_TILE_COUNTS: u16 = 0xCE1B;           // Bank 15, 1 byte per entry
+const SPRITE_RENDERING_FLAGS: u16 = 0xB672;            // Bank 14, 1 byte per entry
+
 /*
  * Clone Entity 0x1D (Skeleton Knight) Sprite to Entity 0x25
  *
  * This allows two versions of unused enemy sprite 0x1D ("Skeleton Knight")
  * with differing behaviours.
  *
- * In fax-edit, place entity #37 to place this version, and use entrypoint 37
+ * In faxedit, place entity #37 to place this version, and use entrypoint 37
  * in the bscript for behaviour.
+ *
+ * All values are read dynamically from the source entity so that faxedit
+ * can reorganize sprite data without breaking this patch.
+ *
+ * This is compatible with sprite patching in faxedit beta 6+!
  */
 pub fn clone_sprite_1d_to_25(rom: &mut Rom) {
-    // Copy the sprite update handler pointer from entity 29 to entity 37.
-    // SPRITE_UPDATE_HANDLERS at $8087 in Bank 14, 2 bytes per entry (address - 1).
-    // SpriteUpdateHandler_Enemy_Unused29 = $9453, stored as $9452 (little-endian, minus 1).
-    let off = rom.cpu_to_file_offset(14, 0x80D1); // SPRITE_UPDATE_HANDLERS[37]
-    rom.write_bytes(off, &[0x52, 0x94]);
+    // 1. Copy sprite update handler pointer (Bank 14, 2 bytes per entry).
+    let src_off = rom.cpu_to_file_offset(14, SPRITE_UPDATE_HANDLERS + SOURCE_ENTITY * 2);
+    let handler = rom.read_word(src_off);
+    let dst_off = rom.cpu_to_file_offset(14, SPRITE_UPDATE_HANDLERS + TARGET_ENTITY * 2);
+    rom.write_bytes(dst_off, &handler.to_le_bytes());
 
-    // Point entity 37 to the same CHR tile data as entity 29 in Bank 6.
-    // BANK6_SPRITEADDRS_START at $8002, 2 bytes per entry.
-    let off = rom.cpu_to_file_offset(6, 0x804C);  // BANK6_SPRITEADDRS_START[37]
-    rom.write_bytes(off, &[0x32, 0x14]);           // same pointer as [29]: $1432
+    // 2. Copy CHR tile data pointer (Bank 6, 2 bytes per entry).
+    let src_off = rom.cpu_to_file_offset(6, BANK6_SPRITEADDRS_START + SOURCE_ENTITY * 2);
+    let chr_ptr = rom.read_word(src_off);
+    let dst_off = rom.cpu_to_file_offset(6, BANK6_SPRITEADDRS_START + TARGET_ENTITY * 2);
+    rom.write_bytes(dst_off, &chr_ptr.to_le_bytes());
 
-    // Copy the sprite appearance phase offset from entity 29 to entity 37.
-    // SPRITE_APPEARANCE_PHASE_OFFSETS at $8C9F in Bank 14, 1 byte per entry.
-    let off = rom.cpu_to_file_offset(14, 0x8CC4);  // [37]
-    rom.write_bytes(off, &[0x35]);                  // same as [29]
+    // 3. Copy sprite appearance phase offset (Bank 14, 1 byte per entry).
+    let src_off = rom.cpu_to_file_offset(14, SPRITE_APPEARANCE_PHASE_OFFSETS + SOURCE_ENTITY);
+    let phase = rom.read_byte(src_off);
+    let dst_off = rom.cpu_to_file_offset(14, SPRITE_APPEARANCE_PHASE_OFFSETS + TARGET_ENTITY);
+    rom.write_bytes(dst_off, &[phase]);
 
-    // Copy the PPU tile count from entity 29 to entity 37.
-    // SPRITES_PPU_TILE_COUNTS at $CE1B in Bank 15, 1 byte per entry.
-    let off = rom.cpu_to_file_offset(15, 0xCE40);  // [37]
-    rom.write_bytes(off, &[0x10]);                  // same as [29]
+    // 4. Copy PPU tile count (Bank 15, 1 byte per entry).
+    let src_off = rom.cpu_to_file_offset(15, SPRITES_PPU_TILE_COUNTS + SOURCE_ENTITY);
+    let tile_count = rom.read_byte(src_off);
+    let dst_off = rom.cpu_to_file_offset(15, SPRITES_PPU_TILE_COUNTS + TARGET_ENTITY);
+    rom.write_bytes(dst_off, &[tile_count]);
 
-    // Copy unknown rendering flag from entity 29 to entity 37.
-    // Table at $B672 in Bank 14, 1 byte per entry. Entity 29 = $FF, entity 37 = $18.
-    let off = rom.cpu_to_file_offset(14, 0xB697);  // [37]
-    rom.write_bytes(off, &[0xFF]);                  // same as [29]
+    // 5. Copy rendering flag (Bank 14, 1 byte per entry).
+    let src_off = rom.cpu_to_file_offset(14, SPRITE_RENDERING_FLAGS + SOURCE_ENTITY);
+    let flag = rom.read_byte(src_off);
+    let dst_off = rom.cpu_to_file_offset(14, SPRITE_RENDERING_FLAGS + TARGET_ENTITY);
+    rom.write_bytes(dst_off, &[flag]);
 
     println!("patch: Entity 0x25 (Invisible Stationary #2) now uses Skeleton Knight sprite from entity 0x1D");
 }

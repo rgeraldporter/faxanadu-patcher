@@ -45,7 +45,8 @@ pub mod mem {
 // for trailing 0xFF bytes. Stored as (bank, cpu_base, cpu_end_exclusive).
 // The scan walks backwards from cpu_end to find the first non-0xFF byte.
 pub const SCAN_BANKS: &[(usize, u16, u16)] = &[
-    (9,  0x8000, 0xC000), // bank 9  (overflow; fax-edit fills bottom-up with level data)
+    (7,  0x8000, 0xC000), // bank 7  (sprite appearance/TILEINFO data)
+    (9,  0x8000, 0xC000), // bank 9  (overflow; faxedit fills bottom-up with level data)
     (12, 0x8000, 0xC000), // bank 12 (scripts, shops, passwords)
     (14, 0x8000, 0xC000), // bank 14 (sprite/player interaction)
     (15, 0xC000, 0xFFE0), // bank 15 (main logic, fixed bank; stop before vectors)

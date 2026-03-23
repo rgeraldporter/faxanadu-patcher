@@ -245,11 +245,11 @@ pub fn crystal_warp_to_spawn(rom: &mut Rom, alloc: &mut FreeSpaceAllocator) {
 }
 
 /*
- * Crystal as Overworld Pickup Item
+ * Crystal as Overworld Pickup Item (! incompatible with faxedit sprite patching)
  *
  * Reuses one of the poison sprite pickups as the Crystal instead.
  *
- * In fax-edit, place entity 0x4C (Poison, index 76) on screens where
+ * In faxedit, place entity 0x4C (Poison, index 76) on screens where
  * you want Crystal pickups to appear.
  *
  * Side effects: In order to find space for this sprite, we replace some of the
@@ -257,6 +257,8 @@ pub fn crystal_warp_to_spawn(rom: &mut Rom, alloc: &mut FreeSpaceAllocator) {
  *
  * Note: The Crystal's use behavior (Down+B to warp) is handled separately by
  * crystal_warp_to_spawn.
+ *
+ *  * ! Do not use with faxedit sprite patching.
  */
 pub fn crystal_overworld_pickup(rom: &mut Rom, alloc: &mut FreeSpaceAllocator) {
 
@@ -368,13 +370,15 @@ pub fn crystal_overworld_pickup(rom: &mut Rom, alloc: &mut FreeSpaceAllocator) {
 }
 
 /*
- * Fire Crystal as Overworld Pickup Item
+ * Fire Crystal as Overworld Pickup Item (! incompatible with faxedit sprite patching)
  *
  * This repurposes the other Red Potion pickup as a Fire Crystal instead.
  *
- * In fax-edit, place entity 0x4B (Red Potion 2, decimal 75) on screens
+ * In faxedit, place entity 0x4B (Red Potion 2, decimal 75) on screens
  * where you want Fire Crystal pickups to appear. Entity 0x5D remains a
  * normal Red Potion.
+ *
+ * ! Do not use with faxedit sprite patching.
  */
 pub fn fire_crystal_overworld_pickup(rom: &mut Rom, alloc: &mut FreeSpaceAllocator) {
 

@@ -39,7 +39,7 @@ You can verify the install worked by running `cargo --version`.
 
 In this early version, patches are toggled by commenting/uncommenting calls in `main.rs`.
 
-Patches that require new code will dynamically allocate to avoid overwriting each other, and will check for free space, accounting for differences that may be present from using [fax-edit](https://github.com/kaimitai/faxedit).
+Patches that require new code will dynamically allocate to avoid overwriting each other, and will check for free space, accounting for differences that may be present from using [faxedit](https://github.com/kaimitai/faxedit).
 
 ## Patches
 

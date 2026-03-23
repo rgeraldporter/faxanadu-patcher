@@ -76,4 +76,62 @@ impl Rom {
         data[offset..end].copy_from_slice(bytes);
     }
 
+    /// Search for a byte pattern within a given bank.
+    /// Returns the file offset of the first match, or None.
+    pub fn find_in_bank(&self, bank: usize, pattern: &[u8]) -> Option<usize> {
+        let bank_start = self.cpu_to_file_offset(bank, if bank == 15 { 0xC000 } else { 0x8000 });
+        let bank_end = bank_start + 0x4000; // 16KB per bank
+        let search = &self.data[bank_start..bank_end];
+        search.windows(pattern.len())
+            .position(|w| w == pattern)
+            .map(|pos| bank_start + pos)
+    }
+
+    /// Search for all occurrences of a byte pattern within a given bank.
+    /// Returns a vec of file offsets.
+    pub fn find_all_in_bank(&self, bank: usize, pattern: &[u8]) -> Vec<usize> {
+        let bank_start = self.cpu_to_file_offset(bank, if bank == 15 { 0xC000 } else { 0x8000 });
+        let bank_end = bank_start + 0x4000;
+        let search = &self.data[bank_start..bank_end];
+        search.windows(pattern.len())
+            .enumerate()
+            .filter(|(_, w)| *w == pattern)
+            .map(|(pos, _)| bank_start + pos)
+            .collect()
+    }
+
+    /// Search for a masked byte pattern within a given bank.
+    /// `mask` has the same length as `pattern`. A mask byte of $FF means
+    /// the corresponding pattern byte must match exactly; $00 means any
+    /// byte is accepted (wildcard).
+    /// Returns the file offset of the first match, or None.
+    pub fn find_masked_in_bank(&self, bank: usize, pattern: &[u8], mask: &[u8]) -> Option<usize> {
+        assert_eq!(pattern.len(), mask.len());
+        let bank_start = self.cpu_to_file_offset(bank, if bank == 15 { 0xC000 } else { 0x8000 });
+        let bank_end = bank_start + 0x4000;
+        let search = &self.data[bank_start..bank_end];
+        search.windows(pattern.len())
+            .position(|w| {
+                w.iter().zip(pattern.iter()).zip(mask.iter())
+                    .all(|((b, p), m)| b & m == p & m)
+            })
+            .map(|pos| bank_start + pos)
+    }
+
+    /// Search for all occurrences of a masked byte pattern within a given bank.
+    pub fn find_all_masked_in_bank(&self, bank: usize, pattern: &[u8], mask: &[u8]) -> Vec<usize> {
+        assert_eq!(pattern.len(), mask.len());
+        let bank_start = self.cpu_to_file_offset(bank, if bank == 15 { 0xC000 } else { 0x8000 });
+        let bank_end = bank_start + 0x4000;
+        let search = &self.data[bank_start..bank_end];
+        search.windows(pattern.len())
+            .enumerate()
+            .filter(|(_, w)| {
+                w.iter().zip(pattern.iter()).zip(mask.iter())
+                    .all(|((b, p), m)| b & m == p & m)
+            })
+            .map(|(pos, _)| bank_start + pos)
+            .collect()
+    }
+
 }

@@ -34,7 +34,7 @@ impl FreeSpaceAllocator {
                 }
             }
 
-            // Reserve one 0xFF byte as a guard — fax-edit/faxiscripts data
+            // Reserve one 0xFF byte as a guard — faxedit/faxiscripts data
             // may depend on a trailing 0xFF terminator.
             let free_start = match last_used {
                 Some(i) => cpu_base + (i as u16) + 2, // +1 past data, +1 guard byte
@@ -100,8 +100,8 @@ impl FreeSpaceAllocator {
         sorted_banks.sort_by_key(|(bank, _)| *bank);
 
         for (&bank, region) in &sorted_banks {
-            let total = region.end - region.start;
-            let used = region.next - region.start;
+            let total = region.end.saturating_sub(region.start);
+            let used = region.next.saturating_sub(region.start);
             let pct = if total > 0 {
                 (used as f64 / total as f64) * 100.0
             } else {

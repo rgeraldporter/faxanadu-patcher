@@ -88,11 +88,14 @@ pub fn ointment_sugata_fix(rom: &mut Rom, alloc: &mut FreeSpaceAllocator) {
 }
 
 /*
- * Fix Fire Spell animation
+ * Fix Fire Spell animation (! incompatible with faxedit sprite patching)
  *
  * This fixes a wrong frame definition in the Fire spell animation.
  *
  * Original code by Kaimitai.
+ *
+ * ! If you use faxedit beta 6 or to sprite patch, go to Sprite Graphics Editor,
+ * NPCS ++ -> 156 -> and fix the incorrect tiles
  */
 pub fn fix_fire_spell_animation(rom: &mut Rom) {
     let off = rom.cpu_to_file_offset(7, 0xA5D3);
@@ -101,12 +104,15 @@ pub fn fix_fire_spell_animation(rom: &mut Rom) {
 }
 
 /*
- * Fix Studded Mail Climb Tile
+ * Fix Studded Mail Climb Tile (! incompatible with faxedit beta 6+)
  *
  * This fixes a bug that appears when Studded Mail is equipped without
  * a shield. When the player uses a ladder, one of the tiles is wrong.
  *
  * Original code by Kaimitai.
+ *
+ * ! If you use faxedit beta 6 or to sprite patch, go to Sprite Graphics Editor,
+ * Player ++ -> 23 -> and set the broken empty tile to chr-tile 125.
  */
 pub fn fix_studded_mail_climb_tile(rom: &mut Rom) {
     let off = rom.cpu_to_file_offset(7, 0xABF9);
